@@ -1,0 +1,20 @@
+# This docker-compose.yml file is used for the tests.
+# It deploy an empty mongodb and a mongo-express.
+
+version: '3'
+services:
+  db:
+    image: mongo:latest
+    volumes:
+      - ./mongo:/docker-entrypoint-initdb.d
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_DATABASE=test
+
+  mongo-express:
+    image: mongo-express:latest
+    links:
+      - db:mongo
+    ports:
+      - 8081:8081

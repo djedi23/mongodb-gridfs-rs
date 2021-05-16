@@ -1,0 +1,23 @@
+[package]
+name = "mongodb-gridfs"
+license = "MIT"
+version = "0.1.0"
+authors = ["Moïse Valvassori <moise.valvassori@gmail.com>"]
+edition = "2018"
+description = "An implementation of Mongo GridFS"
+homepage = "https://github.com/djedi23/mongodb-gridfs-rs"
+repository = "https://github.com/djedi23/mongodb-gridfs-rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+mongodb = { version="1.2.1"}
+bson = {version= "1.2.1" }
+md-5 = "0.8.0"
+futures = "0.3.5"
+typed-builder = "0.9.0"
+chrono = "0.4"
+
+[dev-dependencies]
+tokio = { version="0.2.25", features=["macros"]}
+uuid = "0.8.2"
