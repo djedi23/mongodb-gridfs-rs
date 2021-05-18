@@ -1,9 +1,13 @@
+# MongoDB GridFS Rust Driver
+
+[![Crates.io](https://img.shields.io/crates/v/mongodb-gridfs.svg)](https://crates.io/crates/mongodb-gridfs) [![docs.rs](https://docs.rs/mongodb-gridfs/badge.svg)](https://docs.rs/mongodb-gridfs) 
+
 This crate provides an implementation of Mongo GridFS on the top of mongodb's crate.
 This implementation only use the _async/await_ version of mongodb. 
 
 From https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst
 > GridFS is a convention drivers use to store and retrieve BSON binary data (type “\x05”) that exceeds MongoDB’s BSON-document size limit of 16 MiB. When this data, called a user file, is written to the system, GridFS divides the file into chunks that are stored as distinct documents in a chunks collection. To retrieve a stored file, GridFS locates and returns all of its component chunks. Internally, GridFS creates a files collection document for each stored file. Files collection documents hold information about stored files, and they are stored in a files collection.
-# Examples
+## Examples
 Uploading a document:
  ```rust
  use mongodb_gridfs::{options::GridFSBucketOptions, GridFSBucket};
@@ -21,12 +25,12 @@ let bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()))
 let mut cursor = bucket.open_download_stream(id).await?;
 let buffer = cursor.next().await.unwrap();
  ```
-# Features
+## Features
 The following features are propagated to mongodb:
 - default
 - async-std-runtime
 - tokio-runtime
-# Code Status
+## Code Status
 | Feature                                     | Status | Notes                                           |
 | ------------------------------------------- | ------ | ----------------------------------------------- |
 | GridFSUploadOptions                         | DONE   | `contentType` and `aliases` are not implemented |
