@@ -21,8 +21,12 @@ let bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()))
 let mut cursor = bucket.open_download_stream(id).await?;
 let buffer = cursor.next().await.unwrap();
  ```
-
 # Features
+The following features are propagated to mongodb:
+- default
+- async-std-runtime
+- tokio-runtime
+# Code Status
 | Feature                                     | Status | Notes                                           |
 | ------------------------------------------- | ------ | ----------------------------------------------- |
 | GridFSUploadOptions                         | DONE   | `contentType` and `aliases` are not implemented |

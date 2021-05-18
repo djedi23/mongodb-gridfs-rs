@@ -70,6 +70,11 @@
 //! # }
 //!  ```
 //! # Features
+//! The following features are propagated to mongodb:
+//! - default
+//! - async-std-runtime
+//! - tokio-runtime
+//! # Code Status
 //! | Feature                                     | Status  | Notes                                           |
 //! | ------------------------------------------- | ------- | ----------------------------------------------- |
 //! | GridFSUploadOptions                         | DONE    | `contentType` and `aliases` are not implemented |
