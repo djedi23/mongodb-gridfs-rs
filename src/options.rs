@@ -3,9 +3,15 @@ use mongodb::options::{ReadConcern, ReadPreference, WriteConcern};
 use std::time::Duration;
 use typed_builder::TypedBuilder;
 
+// TODO: rethink the name of the trait
+// TODO: move the trait in another file
+pub trait ProgressUpdate {
+    fn update(&self, position: usize) -> ();
+}
+
 /// [Spec](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst#file-upload)
 #[derive(Clone, Default, TypedBuilder)]
-pub struct GridFSUploadOptions {
+pub struct GridFSUploadOptions<'a> {
     /**
      * The number of bytes per chunk of this file. Defaults to the
      * chunkSizeBytes in the GridFSBucketOptions.
@@ -41,6 +47,12 @@ pub struct GridFSUploadOptions {
     #[builder(default = None)]
     aliases: Option<Vec<String>>,
 
+    /**
+     * TODO: Documentation for progress_tick
+     */
+    // TODO: find a better name.
+    #[builder(default = None)]
+    pub(crate) progress_tick: Option<&'a dyn ProgressUpdate>, // TODO: test process_tick
 }
 
 /// [Spec](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst#configurable-gridfsbucket-class)

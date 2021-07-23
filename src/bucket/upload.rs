@@ -215,11 +215,11 @@ impl GridFSBucket {
        # }
        ```
     */
-    pub async fn upload_from_stream(
+    pub async fn upload_from_stream<'a>(
         mut self,
         filename: &str,
         mut source: impl Read,
-        options: Option<GridFSUploadOptions>,
+        options: Option<GridFSUploadOptions<'a>>,
     ) -> Result<ObjectId, Error> {
         let dboptions = self.options.clone().unwrap_or_default();
         let mut chunk_size: u32 = dboptions.chunk_size_bytes;
@@ -227,10 +227,12 @@ impl GridFSBucket {
         let file_collection = bucket_name.clone() + ".files";
         let disable_md5 = dboptions.disable_md5;
         let chunk_collection = bucket_name + ".chunks";
+        let mut progress_tick = None;
         if let Some(options) = options.clone() {
             if let Some(chunk_size_bytes) = options.chunk_size_bytes {
                 chunk_size = chunk_size_bytes;
             }
+            progress_tick = options.progress_tick;
         }
         let files = self.db.collection(&file_collection);
 
@@ -257,7 +259,7 @@ impl GridFSBucket {
         let mut md5 = Md5::default();
         let chunks = self.db.collection(&chunk_collection);
         let mut vecbuf: Vec<u8> = vec![0; chunk_size as usize];
-        let mut length = 0;
+        let mut length: usize = 0;
         let mut n: u32 = 0;
         loop {
             let buffer = vecbuf.as_mut_slice();
@@ -278,6 +280,9 @@ impl GridFSBucket {
                 .await?;
             length += read_size;
             n += 1;
+            if let Some(progress_tick) = progress_tick {
+                progress_tick.update(length);
+            };
         }
 
         let mut update = doc! { "length": length as u64, "uploadDate": Utc::now() };
