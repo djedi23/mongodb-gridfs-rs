@@ -10,6 +10,7 @@ pub struct GridFSUploadOptions {
      * The number of bytes per chunk of this file. Defaults to the
      * chunkSizeBytes in the GridFSBucketOptions.
      */
+    #[builder(default = None)]
     pub(crate) chunk_size_bytes: Option<u32>,
 
     /**
@@ -17,6 +18,7 @@ pub struct GridFSUploadOptions {
      * If not provided the driver MUST omit the metadata field from the
      * files collection document.
      */
+    #[builder(default = None)]
     pub(crate) metadata: Option<Document>,
 
     /**
@@ -26,6 +28,7 @@ pub struct GridFSUploadOptions {
      * Applications wishing to store a contentType should add a contentType field
      * to the metadata document instead.
      */
+    #[builder(default = None)]
     content_type: Option<String>,
 
     /**
@@ -35,7 +38,9 @@ pub struct GridFSUploadOptions {
      * Applications wishing to store aliases should add an aliases field to the
      * metadata document instead.
      */
+    #[builder(default = None)]
     aliases: Option<Vec<String>>,
+
 }
 
 /// [Spec](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst#configurable-gridfsbucket-class)
