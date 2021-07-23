@@ -98,6 +98,11 @@
 
 pub mod bucket;
 pub mod options;
+use std::{
+    error::Error,
+    fmt::{Display, Formatter, Result},
+};
+
 pub use bucket::GridFSBucket;
 
 #[derive(Debug)]
@@ -109,5 +114,35 @@ pub enum GridFSError {
 impl From<mongodb::error::Error> for GridFSError {
     fn from(err: mongodb::error::Error) -> GridFSError {
         GridFSError::MongoError(err)
+    }
+}
+
+impl Error for GridFSError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            GridFSError::MongoError(e) => Some(e),
+            GridFSError::FileNotFound() => None,
+        }
+    }
+
+    // fn backtrace(&self) -> Option<&std::backtrace::Backtrace> {
+    //     None
+    // }
+
+    fn description(&self) -> &str {
+        "description() is deprecated; use Display"
+    }
+
+    fn cause(&self) -> Option<&dyn Error> {
+        self.source()
+    }
+}
+
+impl Display for GridFSError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        match self {
+            GridFSError::MongoError(me) => write!(f, "{}", me),
+            GridFSError::FileNotFound() => write!(f, "File not found"),
+        }
     }
 }
