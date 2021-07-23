@@ -1,7 +1,7 @@
 [package]
 name = "mongodb-gridfs"
 license = "MIT"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Moïse Valvassori <moise.valvassori@gmail.com>"]
 edition = "2018"
 description = "An implementation of Mongo GridFS"
