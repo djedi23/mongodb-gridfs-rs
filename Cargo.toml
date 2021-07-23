@@ -11,8 +11,8 @@ repository = "https://github.com/djedi23/mongodb-gridfs-rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mongodb = { version="1.2.1", default-features = false}
-bson = {version= "1.2.1" }
+mongodb = { version="1.1", default-features = false}
+bson = {version= "1.1" }
 md-5 = "0.8.0"
 futures = "0.3.5"
 typed-builder = "0.9.0"
