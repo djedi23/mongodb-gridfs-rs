@@ -1,5 +1,5 @@
 use crate::bucket::GridFSBucket;
-use bson::{doc, oid::ObjectId};
+use bson::{doc, oid::ObjectId, Document};
 use mongodb::{error::Result, options::UpdateOptions, results::UpdateResult};
 
 impl GridFSBucket {
@@ -12,7 +12,7 @@ impl GridFSBucket {
         let dboptions = self.options.clone().unwrap_or_default();
         let bucket_name = dboptions.bucket_name;
         let file_collection = bucket_name + ".files";
-        let files = self.db.collection(&file_collection);
+        let files = self.db.collection::<Document>(&file_collection);
 
         let update_options = UpdateOptions::builder()
             .write_concern(dboptions.write_concern)
@@ -33,6 +33,7 @@ mod tests {
     use super::GridFSBucket;
     use crate::{options::GridFSBucketOptions, GridFSError};
     use bson::doc;
+    use bson::Document;
     use mongodb::Client;
     use mongodb::Database;
     use uuid::Uuid;
@@ -62,7 +63,7 @@ mod tests {
         bucket.rename(id.clone(), "renamed_file.txt").await?;
 
         let file = db
-            .collection("fs.files")
+            .collection::<Document>("fs.files")
             .find_one(doc! { "_id": id }, None)
             .await?
             .unwrap();

@@ -1,5 +1,5 @@
 use crate::{bucket::GridFSBucket, GridFSError};
-use bson::{doc, oid::ObjectId};
+use bson::{doc, oid::ObjectId, Document};
 use futures::{Stream, StreamExt};
 use mongodb::options::{FindOneOptions, FindOptions, SelectionCriteria};
 
@@ -61,9 +61,9 @@ impl GridFSBucket {
         let dboptions = self.options.clone().unwrap_or_default();
         let bucket_name = dboptions.bucket_name;
         let file_collection = bucket_name.clone() + ".files";
-        let files = self.db.collection(&file_collection);
+        let files = self.db.collection::<Document>(&file_collection);
         let chunk_collection = bucket_name + ".chunks";
-        let chunks = self.db.collection(&chunk_collection);
+        let chunks = self.db.collection::<Document>(&chunk_collection);
 
         let mut find_one_options = FindOneOptions::default();
         let mut find_options = FindOptions::builder().sort(doc! {"n":1}).build();

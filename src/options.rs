@@ -157,7 +157,7 @@ pub struct GridFSFindOptions {
      * The number of documents to skip before returning.
      */
     #[builder(default)]
-    pub skip: i64,
+    pub skip: u64,
 
     /**
      * The order by which to sort results. Defaults to not sorting.

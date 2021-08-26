@@ -39,11 +39,11 @@ impl GridFSBucket {
     # }
     ```
      */
-    pub async fn find(&self, filter: Document, options: GridFSFindOptions) -> Result<Cursor> {
+    pub async fn find(&self, filter: Document, options: GridFSFindOptions) -> Result<Cursor<Document>> {
         let dboptions = self.options.clone().unwrap_or_default();
         let bucket_name = dboptions.bucket_name;
         let file_collection = bucket_name + ".files";
-        let files = self.db.collection(&file_collection);
+        let files = self.db.collection::<Document>(&file_collection);
 
         let find_options = FindOptions::builder()
             .allow_disk_use(options.allow_disk_use)
