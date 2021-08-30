@@ -220,7 +220,7 @@ impl GridFSBucket {
         mut self,
         filename: &str,
         mut source: impl Read,
-        options: Option<GridFSUploadOptions<'a>>,
+        options: Option<GridFSUploadOptions>,
     ) -> Result<ObjectId, Error> {
         let dboptions = self.options.clone().unwrap_or_default();
         let mut chunk_size: u32 = dboptions.chunk_size_bytes;
@@ -281,7 +281,7 @@ impl GridFSBucket {
                 .await?;
             length += read_size;
             n += 1;
-            if let Some(progress_tick) = progress_tick {
+            if let Some(ref progress_tick) = progress_tick {
                 progress_tick.update(length);
             };
         }
