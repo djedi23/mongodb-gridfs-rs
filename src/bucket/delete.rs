@@ -1,5 +1,5 @@
 use crate::{bucket::GridFSBucket, GridFSError};
-use bson::{doc, oid::ObjectId};
+use bson::{doc, oid::ObjectId, Document};
 use mongodb::options::DeleteOptions;
 
 impl GridFSBucket {
@@ -50,9 +50,9 @@ impl GridFSBucket {
         let dboptions = self.options.clone().unwrap_or_default();
         let bucket_name = dboptions.bucket_name;
         let file_collection = bucket_name.clone() + ".files";
-        let files = self.db.collection(&file_collection);
+        let files = self.db.collection::<Document>(&file_collection);
         let chunk_collection = bucket_name + ".chunks";
-        let chunks = self.db.collection(&chunk_collection);
+        let chunks = self.db.collection::<Document>(&chunk_collection);
 
         let mut delete_option = DeleteOptions::default();
         if let Some(write_concern) = dboptions.write_concern.clone() {
@@ -82,6 +82,7 @@ mod tests {
     use crate::{options::GridFSBucketOptions, GridFSError};
     use bson::doc;
     use bson::oid::ObjectId;
+    use bson::Document;
     use mongodb::Client;
     use mongodb::Database;
     use uuid::Uuid;
@@ -111,13 +112,13 @@ mod tests {
         bucket.delete(id.clone()).await?;
 
         let count = db
-            .collection("fs.files")
+            .collection::<Document>("fs.files")
             .count_documents(doc! { "_id": id.clone() }, None)
             .await?;
         assert_eq!(count, 0, "File should be deleted");
 
         let count = db
-            .collection("fs.chunks")
+            .collection::<Document>("fs.chunks")
             .count_documents(doc! { "files_id": id }, None)
             .await?;
         assert_eq!(count, 0, "Chunks should be deleted");
@@ -141,13 +142,13 @@ mod tests {
         assert!(result.is_err());
 
         let count = db
-            .collection("fs.files")
+            .collection::<Document>("fs.files")
             .count_documents(doc! { "_id": id.clone() }, None)
             .await?;
         assert_eq!(count, 0, "File should be deleted");
 
         let count = db
-            .collection("fs.chunks")
+            .collection::<Document>("fs.chunks")
             .count_documents(doc! { "files_id": id }, None)
             .await?;
         assert_eq!(count, 0, "Chunks should be deleted");

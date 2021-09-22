@@ -1,6 +1,6 @@
 use bson::Document;
 use mongodb::options::{ReadConcern, ReadPreference, WriteConcern};
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 use typed_builder::TypedBuilder;
 
 // TODO: rethink the name of the trait
@@ -11,7 +11,7 @@ pub trait ProgressUpdate {
 
 /// [Spec](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst#file-upload)
 #[derive(Clone, Default, TypedBuilder)]
-pub struct GridFSUploadOptions<'a> {
+pub struct GridFSUploadOptions {
     /**
      * The number of bytes per chunk of this file. Defaults to the
      * chunkSizeBytes in the GridFSBucketOptions.
@@ -52,7 +52,7 @@ pub struct GridFSUploadOptions<'a> {
      */
     // TODO: find a better name.
     #[builder(default = None)]
-    pub(crate) progress_tick: Option<&'a dyn ProgressUpdate>, // TODO: test process_tick
+    pub(crate) progress_tick: Option<Arc<dyn ProgressUpdate + Send + Sync>>, // TODO: test process_tick
 }
 
 /// [Spec](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst#configurable-gridfsbucket-class)
@@ -157,7 +157,7 @@ pub struct GridFSFindOptions {
      * The number of documents to skip before returning.
      */
     #[builder(default)]
-    pub skip: i64,
+    pub skip: u64,
 
     /**
      * The order by which to sort results. Defaults to not sorting.

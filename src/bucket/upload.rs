@@ -8,6 +8,7 @@ use mongodb::{
     options::{FindOneOptions, InsertOneOptions, UpdateOptions},
     Collection,
 };
+use futures::StreamExt;
 use std::io::Read;
 
 impl GridFSBucket {
@@ -51,7 +52,7 @@ impl GridFSBucket {
     /// [Spec](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst#before-write-operations)
     async fn ensure_file_index(
         &mut self,
-        files: &Collection,
+        files: &Collection<Document>,
         file_collection: &str,
         chunk_collection: &str,
     ) -> Result<(), Error> {
@@ -219,7 +220,7 @@ impl GridFSBucket {
         mut self,
         filename: &str,
         mut source: impl Read,
-        options: Option<GridFSUploadOptions<'a>>,
+        options: Option<GridFSUploadOptions>,
     ) -> Result<ObjectId, Error> {
         let dboptions = self.options.clone().unwrap_or_default();
         let mut chunk_size: u32 = dboptions.chunk_size_bytes;
@@ -269,7 +270,7 @@ impl GridFSBucket {
             }
             let mut bin: Vec<u8> = Vec::from(buffer);
             bin.resize(read_size, 0);
-            md5.input(&bin);
+            md5.update(&bin);
             chunks
                 .insert_one(
                     doc! {"files_id":files_id,
@@ -280,14 +281,14 @@ impl GridFSBucket {
                 .await?;
             length += read_size;
             n += 1;
-            if let Some(progress_tick) = progress_tick {
+            if let Some(ref progress_tick) = progress_tick {
                 progress_tick.update(length);
             };
         }
 
-        let mut update = doc! { "length": length as u64, "uploadDate": Utc::now() };
+        let mut update = doc! { "length": length as i64, "uploadDate": Utc::now() };
         if !disable_md5 {
-            update.insert("md5", format!("{:02x}", md5.result()));
+            update.insert("md5", format!("{:02x}", md5.finalize()));
         }
         let mut update_option = UpdateOptions::default();
         if let Some(write_concern) = dboptions.write_concern {
@@ -312,7 +313,7 @@ mod tests {
     use bson::{doc, Document};
     use mongodb::Client;
     use mongodb::{error::Error, Database};
-    use tokio::stream::StreamExt;
+    use futures::StreamExt;
     use uuid::Uuid;
     fn db_name_new() -> String {
         "test_".to_owned()
@@ -336,7 +337,7 @@ mod tests {
 
         assert_eq!(id.to_hex(), id.to_hex());
         let file = db
-            .collection("fs.files")
+            .collection::<Document>("fs.files")
             .find_one(doc! { "_id": id.clone() }, None)
             .await?
             .unwrap();
@@ -387,7 +388,7 @@ mod tests {
 
         assert_eq!(id.to_hex(), id.to_hex());
         let file = db
-            .collection("fs.files")
+            .collection::<Document>("fs.files")
             .find_one(doc! { "_id": id.clone() }, None)
             .await?
             .unwrap();
@@ -400,7 +401,7 @@ mod tests {
         );
 
         let chunks: Vec<Result<Document, Error>> = db
-            .collection("fs.chunks")
+            .collection::<Document>("fs.chunks")
             .find(doc! { "files_id": id }, None)
             .await?
             .collect()

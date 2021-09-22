@@ -1,5 +1,6 @@
 use crate::bucket::GridFSBucket;
 use mongodb::error::Result;
+use bson::Document;
 
 impl GridFSBucket {
     /**
@@ -11,7 +12,7 @@ impl GridFSBucket {
         let dboptions = self.options.clone().unwrap_or_default();
         let bucket_name = dboptions.bucket_name;
         let file_collection = bucket_name.clone() + ".files";
-        let files = self.db.collection(&file_collection);
+        let files = self.db.collection::<Document>(&file_collection);
 
         // let drop_options = DropCollectionOptions::builder()
         //     .write_concern(dboptions.write_concern.clone())
@@ -21,7 +22,7 @@ impl GridFSBucket {
         files.drop(None).await?;
 
         let chunk_collection = bucket_name + ".chunks";
-        let chunks = self.db.collection(&chunk_collection);
+        let chunks = self.db.collection::<Document>(&chunk_collection);
 
         //        let drop_options = DropCollectionOptions::default(); //  builder()
         // .write_concern(dboptions.write_concern)
