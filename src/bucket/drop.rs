@@ -1,6 +1,6 @@
 use crate::bucket::GridFSBucket;
-use mongodb::error::Result;
 use bson::Document;
+use mongodb::error::Result;
 
 impl GridFSBucket {
     /**

@@ -7,11 +7,11 @@ impl GridFSBucket {
     /// Opens a Stream from which the application can read the contents of the stored file
     /// specified by @id.
     /// [Spec](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst#file-download)
-    /// 
+    ///
     /// Returns a [`Stream`].
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     ///  ```rust
     ///  use futures::stream::StreamExt;
     ///  # use mongodb::Client;
@@ -49,9 +49,9 @@ impl GridFSBucket {
     ///  #     Ok(())
     ///  # }
     ///  ```
-    /// 
+    ///
     ///  # Errors
-    /// 
+    ///
     ///  Raise [`GridFSError::FileNotFound`] when the requested id doesn't exists.
     ///
     pub async fn open_download_stream_with_filename(
@@ -91,8 +91,7 @@ impl GridFSBucket {
 
         if let Some(file) = file {
             let filename = file.get_str("filename").unwrap().to_string();
-            let stream =
-            chunks
+            let stream = chunks
                 .find(doc! {"files_id":id}, find_options.clone())
                 .await
                 .unwrap()
@@ -160,7 +159,9 @@ impl GridFSBucket {
         &self,
         id: ObjectId,
     ) -> Result<impl Stream<Item = Vec<u8>>, GridFSError> {
-        self.open_download_stream_with_filename(id).map_ok(|(stream, _)| stream).await
+        self.open_download_stream_with_filename(id)
+            .map_ok(|(stream, _)| stream)
+            .await
     }
 }
 

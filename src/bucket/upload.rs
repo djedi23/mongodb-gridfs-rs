@@ -2,28 +2,28 @@ use crate::bucket::GridFSBucket;
 use crate::options::GridFSUploadOptions;
 use bson::{doc, oid::ObjectId, Document};
 use chrono::Utc;
+use futures::io::{AsyncRead, AsyncReadExt};
 use md5::{Digest, Md5};
 use mongodb::{
     error::Error,
     options::{FindOneOptions, InsertOneOptions, UpdateOptions},
     Collection,
 };
-use futures::io::{AsyncRead, AsyncReadExt};
 
 impl GridFSBucket {
     async fn create_files_index(&self, collection_name: &str) -> Result<Document, Error> {
         self.db
             .run_command(
                 doc! {
-                    "createIndexes": collection_name,
-                    "indexes": [
-                        {
-                            "key": {
-                                "filename":1,
-                                "uploadDate":1.0
-                            },
-                            "name": collection_name.to_owned()+"_index",
-                    }]},
+                "createIndexes": collection_name,
+                "indexes": [
+                    {
+                        "key": {
+                            "filename":1,
+                            "uploadDate":1.0
+                        },
+                        "name": collection_name.to_owned()+"_index",
+                }]},
                 None,
             )
             .await
@@ -215,7 +215,7 @@ impl GridFSBucket {
        # }
        ```
     */
-    pub async fn upload_from_stream<'a> (
+    pub async fn upload_from_stream<'a>(
         &mut self,
         filename: &str,
         mut source: impl AsyncRead + Unpin,
@@ -310,9 +310,9 @@ mod tests {
     use super::GridFSBucket;
     use crate::options::GridFSBucketOptions;
     use bson::{doc, Document};
+    use futures::StreamExt;
     use mongodb::Client;
     use mongodb::{error::Error, Database};
-    use futures::StreamExt;
     use uuid::Uuid;
     fn db_name_new() -> String {
         "test_".to_owned()
