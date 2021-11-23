@@ -85,9 +85,7 @@ impl GridFSBucket {
         existed, is in the process of being deleted, or has been corrupted,
         and the driver MUST raise an error.
         */
-        let file = files
-            .find_one(doc! {"_id":id.clone()}, find_one_options)
-            .await?;
+        let file = files.find_one(doc! {"_id":id}, find_one_options).await?;
 
         if let Some(file) = file {
             let filename = file.get_str("filename").unwrap().to_string();

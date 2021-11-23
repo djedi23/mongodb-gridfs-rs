@@ -60,7 +60,7 @@ impl GridFSBucket {
         }
 
         let delete_result = files
-            .delete_one(doc! {"_id":id.clone()}, delete_option.clone())
+            .delete_one(doc! {"_id":id}, delete_option.clone())
             .await?;
 
         // If there is no such file listed in the files collection,
@@ -109,11 +109,11 @@ mod tests {
 
         assert_eq!(id.to_hex(), id.to_hex());
 
-        bucket.delete(id.clone()).await?;
+        bucket.delete(id).await?;
 
         let count = db
             .collection::<Document>("fs.files")
-            .count_documents(doc! { "_id": id.clone() }, None)
+            .count_documents(doc! { "_id": id }, None)
             .await?;
         assert_eq!(count, 0, "File should be deleted");
 
@@ -138,12 +138,12 @@ mod tests {
         let bucket = &GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
         let id = ObjectId::new();
 
-        let result = bucket.delete(id.clone()).await;
+        let result = bucket.delete(id).await;
         assert!(result.is_err());
 
         let count = db
             .collection::<Document>("fs.files")
-            .count_documents(doc! { "_id": id.clone() }, None)
+            .count_documents(doc! { "_id": id }, None)
             .await?;
         assert_eq!(count, 0, "File should be deleted");
 

@@ -115,7 +115,7 @@ impl GridFSBucket {
                         }
                     }
                     if !have_index {
-                        self.create_files_index(&file_collection).await?;
+                        self.create_files_index(file_collection).await?;
                     }
                 }
                 {
@@ -166,7 +166,7 @@ impl GridFSBucket {
                         }
                     }
                     if !have_index {
-                        self.create_chunks_index(&chunk_collection).await?;
+                        self.create_chunks_index(chunk_collection).await?;
                     }
                 }
             }
@@ -301,7 +301,7 @@ impl GridFSBucket {
             )
             .await?;
 
-        Ok(files_id.clone())
+        Ok(files_id)
     }
 }
 
@@ -337,7 +337,7 @@ mod tests {
         assert_eq!(id.to_hex(), id.to_hex());
         let file = db
             .collection::<Document>("fs.files")
-            .find_one(doc! { "_id": id.clone() }, None)
+            .find_one(doc! { "_id": id }, None)
             .await?
             .unwrap();
         assert_eq!(file.get_str("filename").unwrap(), "test.txt");
@@ -362,7 +362,7 @@ mod tests {
                 .unwrap()
                 .get_binary_generic("data")
                 .unwrap(),
-            &vec![116 as u8, 101, 115, 116, 32, 100, 97, 116, 97]
+            &vec![116_u8, 101, 115, 116, 32, 100, 97, 116, 97]
         );
 
         db.drop(None).await
@@ -388,7 +388,7 @@ mod tests {
         assert_eq!(id.to_hex(), id.to_hex());
         let file = db
             .collection::<Document>("fs.files")
-            .find_one(doc! { "_id": id.clone() }, None)
+            .find_one(doc! { "_id": id }, None)
             .await?
             .unwrap();
         assert_eq!(file.get_str("filename").unwrap(), "test.txt");
@@ -413,7 +413,7 @@ mod tests {
                 .unwrap()
                 .get_binary_generic("data")
                 .unwrap(),
-            &vec![116 as u8, 101, 115, 116, 32, 100, 97, 116]
+            &vec![116_u8, 101, 115, 116, 32, 100, 97, 116]
         );
 
         assert_eq!(chunks[1].as_ref().unwrap().get_i32("n").unwrap(), 1);
@@ -423,7 +423,7 @@ mod tests {
                 .unwrap()
                 .get_binary_generic("data")
                 .unwrap(),
-            &vec![97 as u8, 32, 49, 50, 51, 52, 53, 54]
+            &vec![97_u8, 32, 49, 50, 51, 52, 53, 54]
         );
 
         assert_eq!(chunks[2].as_ref().unwrap().get_i32("n").unwrap(), 2);
@@ -433,7 +433,7 @@ mod tests {
                 .unwrap()
                 .get_binary_generic("data")
                 .unwrap(),
-            &vec![55 as u8, 56, 57, 48]
+            &vec![55_u8, 56, 57, 48]
         );
 
         db.drop(None).await

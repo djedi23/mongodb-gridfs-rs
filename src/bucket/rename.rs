@@ -60,7 +60,7 @@ mod tests {
 
         assert_eq!(id.to_hex(), id.to_hex());
 
-        bucket.rename(id.clone(), "renamed_file.txt").await?;
+        bucket.rename(id, "renamed_file.txt").await?;
 
         let file = db
             .collection::<Document>("fs.files")

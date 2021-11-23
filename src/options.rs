@@ -6,7 +6,7 @@ use typed_builder::TypedBuilder;
 // TODO: rethink the name of the trait
 // TODO: move the trait in another file
 pub trait ProgressUpdate {
-    fn update(&self, position: usize) -> ();
+    fn update(&self, position: usize);
 }
 
 /// [Spec](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst#file-upload)
