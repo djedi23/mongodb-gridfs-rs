@@ -11,7 +11,7 @@ From https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-
 Uploading a document:
  ```rust
  use mongodb_gridfs::{options::GridFSBucketOptions, GridFSBucket};
- let bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
+ let mut bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
  let id = bucket
      .upload_from_stream("test.txt", "stream your data here".as_bytes(), None)
      .await?;

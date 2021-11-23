@@ -8,8 +8,7 @@ use mongodb::{
     options::{FindOneOptions, InsertOneOptions, UpdateOptions},
     Collection,
 };
-use futures::StreamExt;
-use std::io::Read;
+use futures::io::{AsyncRead, AsyncReadExt};
 
 impl GridFSBucket {
     async fn create_files_index(&self, collection_name: &str) -> Result<Document, Error> {
@@ -20,8 +19,8 @@ impl GridFSBucket {
                     "indexes": [
                         {
                             "key": {
-                "filename":1,
-                "uploadDate":1.0
+                                "filename":1,
+                                "uploadDate":1.0
                             },
                             "name": collection_name.to_owned()+"_index",
                     }]},
@@ -216,10 +215,10 @@ impl GridFSBucket {
        # }
        ```
     */
-    pub async fn upload_from_stream<'a>(
-        mut self,
+    pub async fn upload_from_stream<'a> (
+        &mut self,
         filename: &str,
-        mut source: impl Read,
+        mut source: impl AsyncRead + Unpin,
         options: Option<GridFSUploadOptions>,
     ) -> Result<ObjectId, Error> {
         let dboptions = self.options.clone().unwrap_or_default();
@@ -264,7 +263,7 @@ impl GridFSBucket {
         let mut n: u32 = 0;
         loop {
             let buffer = vecbuf.as_mut_slice();
-            let read_size = source.read(buffer)?;
+            let read_size = source.read(buffer).await?;
             if read_size == 0 {
                 break;
             }
@@ -330,7 +329,7 @@ mod tests {
         .await?;
         let dbname = db_name_new();
         let db: Database = client.database(&dbname);
-        let bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
+        let mut bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
         let id = bucket
             .upload_from_stream("test.txt", "test data".as_bytes(), None)
             .await?;
@@ -378,7 +377,7 @@ mod tests {
         .await?;
         let dbname = db_name_new();
         let db: Database = client.database(&dbname);
-        let bucket = GridFSBucket::new(
+        let mut bucket = GridFSBucket::new(
             db.clone(),
             Some(GridFSBucketOptions::builder().chunk_size_bytes(8).build()),
         );
@@ -449,7 +448,7 @@ mod tests {
         .await?;
         let dbname = db_name_new();
         let db: Database = client.database(&dbname);
-        let bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
+        let mut bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
 
         let indexes = db
             .run_command(doc! {"listIndexes":"fs.files"}, None)
@@ -510,7 +509,7 @@ mod tests {
         .await?;
         let dbname = db_name_new();
         let db: Database = client.database(&dbname);
-        let bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
+        let mut bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
 
         let indexes = db
             .run_command(doc! {"listIndexes":"fs.chunks"}, None)
