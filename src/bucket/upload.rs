@@ -206,7 +206,7 @@ impl GridFSBucket {
        #    let client = Client::with_uri_str(&std::env::var("MONGO_URI").unwrap_or("mongodb://localhost:27017/".to_string())).await?;
        #    let dbname = db_name_new();
        #    let db: Database = client.database(&dbname);
-       let bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
+       let mut bucket = GridFSBucket::new(db.clone(), Some(GridFSBucketOptions::default()));
        let id = bucket
            .upload_from_stream("test.txt", "stream your data here".as_bytes(), None)
            .await?;
