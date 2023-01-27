@@ -1,14 +1,18 @@
 use bson::doc;
-use futures::stream::StreamExt;
-use mongodb::error::Result;
-use mongodb::Client;
-use mongodb::Database;
-use mongodb_gridfs::options::GridFSBucketOptions;
-use mongodb_gridfs::{bucket::GridFSBucket, options::GridFSFindOptions};
+#[cfg(feature = "async-std-runtime")]
+use futures::StreamExt;
+use mongodb::{error::Result, Client, Database};
+use mongodb_gridfs::{
+    bucket::GridFSBucket,
+    options::{GridFSBucketOptions, GridFSFindOptions},
+};
+#[cfg(any(feature = "default", feature = "tokio-runtime"))]
+use tokio_stream::StreamExt;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let client = Client::with_uri_str(
-        &std::env::var("MONGO_URI").unwrap_or("mongodb://localhost:27017/".to_string()),
+        &std::env::var("MONGO_URI").unwrap_or_else(|_| "mongodb://localhost:27017/".to_string()),
     )
     .await?;
     let db: Database = client.database("test");

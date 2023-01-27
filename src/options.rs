@@ -34,6 +34,7 @@ pub struct GridFSUploadOptions {
      * Applications wishing to store a contentType should add a contentType field
      * to the metadata document instead.
      */
+    #[allow(dead_code)]
     #[builder(default = None)]
     content_type: Option<String>,
 
@@ -44,6 +45,7 @@ pub struct GridFSUploadOptions {
      * Applications wishing to store aliases should add an aliases field to the
      * metadata document instead.
      */
+    #[allow(dead_code)]
     #[builder(default = None)]
     aliases: Option<Vec<String>>,
 
@@ -123,7 +125,7 @@ pub struct GridFSFindOptions {
      * is to not send a value. For servers < 3.2, this option is ignored and not sent
      * as allowDiskUse does not exist in the OP_QUERY wire protocol.
      *
-     * @see https://docs.mongodb.com/manual/reference/command/find/
+     * @see <https://docs.mongodb.com/manual/reference/command/find/>
      */
     #[builder(default)]
     pub allow_disk_use: Option<bool>,

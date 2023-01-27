@@ -1,5 +1,4 @@
-use mongodb::Client;
-use mongodb::{error::Error, Database};
+use mongodb::{error::Error, Client, Database};
 use mongodb_gridfs::{options::GridFSBucketOptions, GridFSBucket};
 use uuid::Uuid;
 
@@ -13,7 +12,7 @@ fn db_name_new() -> String {
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let client = Client::with_uri_str(
-        &std::env::var("MONGO_URI").unwrap_or("mongodb://localhost:27017/".to_string()),
+        &std::env::var("MONGO_URI").unwrap_or_else(|_| "mongodb://localhost:27017/".to_string()),
     )
     .await?;
     let dbname = db_name_new();

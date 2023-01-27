@@ -1,7 +1,9 @@
-use futures::stream::StreamExt;
-use mongodb::Client;
-use mongodb::Database;
+#[cfg(feature = "async-std-runtime")]
+use futures::StreamExt;
+use mongodb::{Client, Database};
 use mongodb_gridfs::{options::GridFSBucketOptions, GridFSBucket, GridFSError};
+#[cfg(any(feature = "default", feature = "tokio-runtime"))]
+use tokio_stream::StreamExt;
 use uuid::Uuid;
 
 fn db_name_new() -> String {
@@ -14,7 +16,7 @@ fn db_name_new() -> String {
 #[tokio::main]
 async fn main() -> Result<(), GridFSError> {
     let client = Client::with_uri_str(
-        &std::env::var("MONGO_URI").unwrap_or("mongodb://localhost:27017/".to_string()),
+        &std::env::var("MONGO_URI").unwrap_or_else(|_| "mongodb://localhost:27017/".to_string()),
     )
     .await?;
     let dbname = db_name_new();

@@ -13,7 +13,10 @@ impl GridFSBucket {
 
     ```rust
     use bson::doc;
-    use futures::stream::StreamExt;
+    # #[cfg(feature = "async-std-runtime")]
+    # use futures::stream::StreamExt;
+    # #[cfg(any(feature = "default", feature = "tokio-runtime"))]
+    use tokio_stream::StreamExt;
     # use mongodb::error::Result;
     # use mongodb::Client;
     # use mongodb::Database;
@@ -71,10 +74,13 @@ mod tests {
         GridFSError,
     };
     use bson::doc;
+    #[cfg(feature = "async-std-runtime")]
     use futures::stream::StreamExt;
-    use mongodb::Client;
-    use mongodb::Database;
+    use mongodb::{Client, Database};
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
+    use tokio_stream::StreamExt;
     use uuid::Uuid;
+
     fn db_name_new() -> String {
         "test_".to_owned()
             + Uuid::new_v4()

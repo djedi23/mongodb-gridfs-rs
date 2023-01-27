@@ -2,6 +2,7 @@ use crate::bucket::GridFSBucket;
 use crate::options::GridFSUploadOptions;
 use bson::{doc, oid::ObjectId, Document};
 use chrono::Utc;
+#[cfg(feature = "async-std-runtime")]
 use futures::io::{AsyncRead, AsyncReadExt};
 use md5::{Digest, Md5};
 use mongodb::{
@@ -9,6 +10,8 @@ use mongodb::{
     options::{FindOneOptions, InsertOneOptions, UpdateOptions},
     Collection,
 };
+#[cfg(any(feature = "default", feature = "tokio-runtime"))]
+use tokio::io::{AsyncRead, AsyncReadExt};
 
 impl GridFSBucket {
     async fn create_files_index(&self, collection_name: &str) -> Result<Document, Error> {
@@ -310,9 +313,11 @@ mod tests {
     use super::GridFSBucket;
     use crate::options::GridFSBucketOptions;
     use bson::{doc, Document};
+    #[cfg(feature = "async-std-runtime")]
     use futures::StreamExt;
-    use mongodb::Client;
-    use mongodb::{error::Error, Database};
+    use mongodb::{error::Error, Client, Database};
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
+    use tokio_stream::StreamExt;
     use uuid::Uuid;
     fn db_name_new() -> String {
         "test_".to_owned()

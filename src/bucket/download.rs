@@ -1,7 +1,10 @@
 use crate::{bucket::GridFSBucket, GridFSError};
 use bson::{doc, oid::ObjectId, Document};
-use futures::{Stream, StreamExt, TryFutureExt};
+#[cfg(feature = "async-std-runtime")]
+use futures::{Stream, StreamExt};
 use mongodb::options::{FindOneOptions, FindOptions, SelectionCriteria};
+#[cfg(any(feature = "default", feature = "tokio-runtime"))]
+use tokio_stream::{Stream, StreamExt};
 
 impl GridFSBucket {
     /// Opens a Stream from which the application can read the contents of the stored file
@@ -13,7 +16,10 @@ impl GridFSBucket {
     /// # Examples
     ///
     ///  ```rust
-    ///  use futures::stream::StreamExt;
+    ///  # #[cfg(feature = "async-std-runtime")]
+    ///  # use futures::stream::StreamExt;
+    ///  # #[cfg(any(feature = "default", feature = "tokio-runtime"))]
+    ///  use tokio_stream::StreamExt;
     ///  # use mongodb::Client;
     ///  # use mongodb::Database;
     ///  use mongodb_gridfs::{options::GridFSBucketOptions, GridFSBucket, GridFSError};
@@ -113,7 +119,10 @@ impl GridFSBucket {
      # Examples
 
      ```rust
-     use futures::stream::StreamExt;
+     # #[cfg(feature = "async-std-runtime")]
+     # use futures::stream::StreamExt;
+     # #[cfg(any(feature = "default", feature = "tokio-runtime"))]
+     use tokio_stream::StreamExt;
      # use mongodb::Client;
      # use mongodb::Database;
      use mongodb_gridfs::{options::GridFSBucketOptions, GridFSBucket, GridFSError};
@@ -157,9 +166,8 @@ impl GridFSBucket {
         &self,
         id: ObjectId,
     ) -> Result<impl Stream<Item = Vec<u8>>, GridFSError> {
-        self.open_download_stream_with_filename(id)
-            .map_ok(|(stream, _)| stream)
-            .await
+        let (stream, _) = self.open_download_stream_with_filename(id).await?;
+        Ok(stream)
     }
 }
 
@@ -168,10 +176,13 @@ mod tests {
     use super::GridFSBucket;
     use crate::{options::GridFSBucketOptions, GridFSError};
     use bson::oid::ObjectId;
+    #[cfg(feature = "async-std-runtime")]
     use futures::stream::StreamExt;
-    use mongodb::Client;
-    use mongodb::Database;
+    use mongodb::{Client, Database};
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
+    use tokio_stream::StreamExt;
     use uuid::Uuid;
+
     fn db_name_new() -> String {
         "test_".to_owned()
             + Uuid::new_v4()

@@ -1,7 +1,7 @@
 [package]
 name = "mongodb-gridfs"
 license = "MIT"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Moïse Valvassori <moise.valvassori@gmail.com>"]
 edition = "2018"
 description = "An implementation of Mongo GridFS"
@@ -11,18 +11,20 @@ repository = "https://github.com/djedi23/mongodb-gridfs-rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mongodb = { version = "2.0.0", default-features=false, features=["bson-chrono-0_4", "bson-uuid-0_8"] }
-bson = {version= "2.0.0"}
-md-5 = "0.9.1"
-futures = "0.3.5"
-typed-builder = "0.9.0"
+mongodb = { version = "2", default-features=false, features=["bson-chrono-0_4", "bson-uuid-0_8"] }
+bson = {version= "2"}
+md-5 = "0.10"
+futures = { version="0.3", optional=true}
+typed-builder = "0.10"
 chrono = "0.4"
+tokio = { version="1", optional=true}
+tokio-stream = { version="0.1", optional=true}
 
 [dev-dependencies]
-tokio = { version="1.9.0", features=["test-util"]}
-uuid = "0.8.2"
+tokio = { version="1", features=["test-util"]}
+uuid = "0.8"
 
 [features]
-default = ["mongodb/default"]
-async-std-runtime = ["mongodb/async-std-runtime"]
-tokio-runtime = ["mongodb/tokio-runtime"]
+default = ["mongodb/default", "dep:tokio","dep:tokio-stream"]
+async-std-runtime = ["mongodb/async-std-runtime", "dep:futures"]
+tokio-runtime = ["mongodb/tokio-runtime", "dep:tokio","dep:tokio-stream"]

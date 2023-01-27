@@ -1,7 +1,7 @@
 //! This crate provides an implementation of Mongo GridFS on the top of mongodb's crate.
 //! This implementation only use the _async/await_ version of mongodb.
 //!
-//! From https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst
+//! From <https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst>
 //! > GridFS is a convention drivers use to store and retrieve BSON binary data (type “\x05”) that exceeds MongoDB’s BSON-document size limit of 16 MiB. When this data, called a user file, is written to the system, GridFS divides the file into chunks that are stored as distinct documents in a chunks collection. To retrieve a stored file, GridFS locates and returns all of its component chunks. Internally, GridFS creates a files collection document for each stored file. Files collection documents hold information about stored files, and they are stored in a files collection.
 //! # Examples
 //! Uploading a document:
@@ -33,7 +33,10 @@
 //!  ```
 //!  Downloading a document:
 //!  ```rust
-//! use futures::stream::StreamExt;
+//! # #[cfg(feature = "async-std-runtime")]
+//! # use futures::stream::StreamExt;
+//! # #[cfg(any(feature = "default", feature = "tokio-runtime"))]
+//! use tokio_stream::StreamExt;
 //! # use mongodb::Client;
 //! # use mongodb::Database;
 //! use mongodb_gridfs::{options::GridFSBucketOptions, GridFSBucket, GridFSError};
