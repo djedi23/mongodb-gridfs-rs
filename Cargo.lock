@@ -940,7 +940,7 @@ dependencies = [
 
 [[package]]
 name = "mongodb-gridfs"
-version = "0.2.3"
+version = "0.2.3-patched"
 dependencies = [
  "bson",
  "chrono",
