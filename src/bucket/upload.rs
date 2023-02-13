@@ -316,6 +316,7 @@ mod tests {
     #[cfg(feature = "async-std-runtime")]
     use futures::StreamExt;
     use mongodb::{error::Error, Client, Database};
+    use std::io::Write;
     #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     use tokio_stream::StreamExt;
     use uuid::Uuid;
@@ -324,6 +325,14 @@ mod tests {
             + Uuid::new_v4()
                 .to_hyphenated()
                 .encode_lower(&mut Uuid::encode_buffer())
+    }
+    fn generate_large_text(size: usize) -> Vec<u8> {
+        let mut buffer = Vec::new();
+        buffer.reserve(size);
+        for i in 0..size {
+            buffer.push((i % 8) as u8);
+        }
+        buffer
     }
 
     #[tokio::test]
@@ -440,6 +449,144 @@ mod tests {
                 .unwrap(),
             &vec![55_u8, 56, 57, 48]
         );
+
+        db.drop(None).await
+        // Ok(())
+    }
+
+    #[tokio::test]
+    async fn upload_from_stream_chunk_size_from_tokio_file() -> Result<(), Error> {
+        let client = Client::with_uri_str(
+            &std::env::var("MONGO_URI").unwrap_or("mongodb://localhost:27017/".to_string()),
+        )
+        .await?;
+        let chunk_size: usize = 255 * 1024;
+        let text_len: usize = 400 * 1024;
+        let dbname = db_name_new();
+        let db: Database = client.database(&dbname);
+        let mut bucket = GridFSBucket::new(
+            db.clone(),
+            Some(
+                GridFSBucketOptions::builder()
+                    .chunk_size_bytes(chunk_size as u32)
+                    .build(),
+            ),
+        );
+        let large_text: Vec<u8> = generate_large_text(text_len);
+        let mut file = tempfile::NamedTempFile::new().unwrap();
+        file.write_all(large_text.as_slice()).unwrap();
+        file.flush().unwrap();
+
+        let async_file = tokio::fs::File::open(file.path()).await?;
+        let id = bucket
+            .upload_from_stream("test.txt", async_file, None)
+            .await?;
+
+        assert_eq!(id.to_hex(), id.to_hex());
+        let file = db
+            .collection::<Document>("fs.files")
+            .find_one(doc! { "_id": id }, None)
+            .await?
+            .unwrap();
+        assert_eq!(file.get_str("filename").unwrap(), "test.txt");
+        assert_eq!(file.get_i32("chunkSize").unwrap(), chunk_size as i32);
+        assert_eq!(file.get_i64("length").unwrap(), text_len as i64);
+        assert_eq!(
+            file.get_str("md5").unwrap(),
+            "324fc7dfb78e561b7dd47e9503bc2dfa"
+        );
+
+        let chunks: Vec<Result<Document, Error>> = db
+            .collection::<Document>("fs.chunks")
+            .find(doc! { "files_id": id }, None)
+            .await?
+            .collect()
+            .await;
+
+        let n_chunks: usize = chunks.len();
+        assert_eq!(n_chunks, (text_len - 1) / chunk_size + 1);
+
+        for i in 0..n_chunks {
+            assert_eq!(chunks[i].as_ref().unwrap().get_i32("n").unwrap(), i as i32);
+
+            let chunk = chunks[i]
+                .as_ref()
+                .unwrap()
+                .get_binary_generic("data")
+                .unwrap();
+            let start = i * chunk_size;
+            let end = start + std::cmp::min(chunk.len(), chunk_size);
+            assert_eq!(chunk, &large_text[start..end]);
+        }
+
+        db.drop(None).await
+        // Ok(())
+    }
+
+    #[tokio::test]
+    async fn upload_from_stream_chunk_size_from_align_tokio_file() -> Result<(), Error> {
+        let client = Client::with_uri_str(
+            &std::env::var("MONGO_URI").unwrap_or("mongodb://localhost:27017/".to_string()),
+        )
+        .await?;
+        let chunk_size: usize = 255 * 1024;
+        let text_len: usize = 255 * 1024;
+        let dbname = db_name_new();
+        let db: Database = client.database(&dbname);
+        let mut bucket = GridFSBucket::new(
+            db.clone(),
+            Some(
+                GridFSBucketOptions::builder()
+                    .chunk_size_bytes(chunk_size as u32)
+                    .build(),
+            ),
+        );
+        let large_text: Vec<u8> = generate_large_text(text_len);
+        let mut file = tempfile::NamedTempFile::new().unwrap();
+        file.write_all(large_text.as_slice()).unwrap();
+        file.flush().unwrap();
+
+        let async_file = tokio::fs::File::open(file.path()).await?;
+        let id = bucket
+            .upload_from_stream("test.txt", async_file, None)
+            .await?;
+
+        assert_eq!(id.to_hex(), id.to_hex());
+        let file = db
+            .collection::<Document>("fs.files")
+            .find_one(doc! { "_id": id }, None)
+            .await?
+            .unwrap();
+        assert_eq!(file.get_str("filename").unwrap(), "test.txt");
+        assert_eq!(file.get_i32("chunkSize").unwrap(), chunk_size as i32);
+        assert_eq!(file.get_i64("length").unwrap(), text_len as i64);
+        assert_eq!(
+            file.get_str("md5").unwrap(),
+            "62f27a894992f3b7f532631a2aafcdc4"
+        );
+
+        let chunks: Vec<Result<Document, Error>> = db
+            .collection::<Document>("fs.chunks")
+            .find(doc! { "files_id": id }, None)
+            .await?
+            .collect()
+            .await;
+
+        let n_chunks: usize = chunks.len();
+        assert_eq!(n_chunks, (text_len - 1) / chunk_size + 1);
+
+        for i in 0..n_chunks {
+            assert_eq!(chunks[i].as_ref().unwrap().get_i32("n").unwrap(), i as i32);
+
+            let chunk = chunks[i]
+                .as_ref()
+                .unwrap()
+                .get_binary_generic("data")
+                .unwrap();
+            let start = i * chunk_size;
+            let end = start + std::cmp::min(chunk.len(), chunk_size);
+            assert_eq!(chunk, &large_text[start..end]);
+        }
 
         db.drop(None).await
         // Ok(())
