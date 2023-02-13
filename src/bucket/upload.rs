@@ -265,13 +265,22 @@ impl GridFSBucket {
         let mut length: usize = 0;
         let mut n: u32 = 0;
         loop {
-            let buffer = vecbuf.as_mut_slice();
-            let read_size = source.read(buffer).await?;
-            if read_size == 0 {
-                break;
-            }
-            let mut bin: Vec<u8> = Vec::from(buffer);
-            bin.resize(read_size, 0);
+            let chunk_read_size = {
+                let mut chunk_read_size = 0;
+                loop {
+                    let buffer = &mut vecbuf[chunk_read_size..];
+                    let step_read_size = source.read(buffer).await?;
+                    if step_read_size == 0 {
+                        break;
+                    }
+                    chunk_read_size += step_read_size;
+                }
+                if chunk_read_size == 0 {
+                    break;
+                }
+                chunk_read_size
+            };
+            let bin: Vec<u8> = Vec::from(&vecbuf[..chunk_read_size]);
             md5.update(&bin);
             chunks
                 .insert_one(
@@ -281,7 +290,7 @@ impl GridFSBucket {
                     Some(insert_option.clone()),
                 )
                 .await?;
-            length += read_size;
+            length += chunk_read_size;
             n += 1;
             if let Some(ref progress_tick) = progress_tick {
                 progress_tick.update(length);
