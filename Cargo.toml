@@ -21,7 +21,8 @@ tokio = { version="1", optional=true}
 tokio-stream = { version="0.1", optional=true}
 
 [dev-dependencies]
-tokio = { version="1", features=["test-util"]}
+tempfile = "3.3.0"
+tokio = { version="1", features=["fs", "test-util"]}
 uuid = "0.8"
 
 [features]
