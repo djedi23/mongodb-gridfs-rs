@@ -324,6 +324,7 @@ mod tests {
     #[cfg(feature = "async-std-runtime")]
     use futures::StreamExt;
     use mongodb::{error::Error, Client, Database};
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     use std::io::Write;
     #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     use tokio_stream::StreamExt;
@@ -334,6 +335,7 @@ mod tests {
                 .hyphenated()
                 .encode_lower(&mut Uuid::encode_buffer())
     }
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     fn generate_large_text(size: usize) -> Vec<u8> {
         let mut buffer = Vec::new();
         buffer.reserve(size);
@@ -462,6 +464,7 @@ mod tests {
         // Ok(())
     }
 
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     #[tokio::test]
     async fn upload_from_stream_chunk_size_from_tokio_file() -> Result<(), Error> {
         let client = Client::with_uri_str(
@@ -531,6 +534,7 @@ mod tests {
         // Ok(())
     }
 
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     #[tokio::test]
     async fn upload_from_stream_chunk_size_from_align_tokio_file() -> Result<(), Error> {
         let client = Client::with_uri_str(

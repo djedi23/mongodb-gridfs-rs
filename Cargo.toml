@@ -14,8 +14,8 @@ repository = "https://github.com/djedi23/mongodb-gridfs-rs"
 mongodb = { version = "2", default-features=false }
 bson = {version= "2"}
 md-5 = "0.10"
-futures = { version="0.3", optional=true}
 typed-builder = "0.10"
+futures = { version="0.3", optional=true}
 tokio = { version="1", optional=true}
 tokio-stream = { version="0.1", optional=true}
 
