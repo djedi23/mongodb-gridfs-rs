@@ -1,7 +1,6 @@
 use crate::bucket::GridFSBucket;
 use crate::options::GridFSUploadOptions;
-use bson::{doc, oid::ObjectId, Document};
-use chrono::Utc;
+use bson::{doc, oid::ObjectId, DateTime, Document};
 #[cfg(feature = "async-std-runtime")]
 use futures::io::{AsyncRead, AsyncReadExt};
 use md5::{Digest, Md5};
@@ -297,7 +296,7 @@ impl GridFSBucket {
             };
         }
 
-        let mut update = doc! { "length": length as i64, "uploadDate": Utc::now() };
+        let mut update = doc! { "length": length as i64, "uploadDate": DateTime::now() };
         if !disable_md5 {
             update.insert("md5", format!("{:02x}", md5.finalize()));
         }
