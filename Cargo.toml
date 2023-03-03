@@ -11,7 +11,7 @@ repository = "https://github.com/djedi23/mongodb-gridfs-rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mongodb = { version = "2", default-features=false, features=["bson-uuid-0_8"] }
+mongodb = { version = "2", default-features=false }
 bson = {version= "2"}
 md-5 = "0.10"
 futures = { version="0.3", optional=true}
@@ -22,7 +22,7 @@ tokio-stream = { version="0.1", optional=true}
 [dev-dependencies]
 tempfile = "3.3.0"
 tokio = { version="1", features=["fs", "test-util"]}
-uuid = "0.8"
+uuid = "1"
 
 [features]
 default = ["mongodb/default", "dep:tokio","dep:tokio-stream"]
