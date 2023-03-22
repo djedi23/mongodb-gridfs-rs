@@ -27,7 +27,7 @@ impl GridFSBucket {
     ///  # fn db_name_new() -> String {
     ///  #     "test_".to_owned()
     ///  #         + Uuid::new_v4()
-    ///  #             .to_hyphenated()
+    ///  #             .hyphenated()
     ///  #             .encode_lower(&mut Uuid::encode_buffer())
     ///  # }
     ///  #
@@ -130,7 +130,7 @@ impl GridFSBucket {
      # fn db_name_new() -> String {
      #     "test_".to_owned()
      #         + Uuid::new_v4()
-     #             .to_hyphenated()
+     #             .hyphenated()
      #             .encode_lower(&mut Uuid::encode_buffer())
      # }
      #
@@ -186,7 +186,7 @@ mod tests {
     fn db_name_new() -> String {
         "test_".to_owned()
             + Uuid::new_v4()
-                .to_hyphenated()
+                .hyphenated()
                 .encode_lower(&mut Uuid::encode_buffer())
     }
 

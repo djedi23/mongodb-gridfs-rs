@@ -1,7 +1,6 @@
 use crate::bucket::GridFSBucket;
 use crate::options::GridFSUploadOptions;
-use bson::{doc, oid::ObjectId, Document};
-use chrono::Utc;
+use bson::{doc, oid::ObjectId, DateTime, Document};
 #[cfg(feature = "async-std-runtime")]
 use futures::io::{AsyncRead, AsyncReadExt};
 use md5::{Digest, Md5};
@@ -200,7 +199,7 @@ impl GridFSBucket {
        # fn db_name_new() -> String {
        #     "test_".to_owned()
        #         + Uuid::new_v4()
-       #             .to_hyphenated()
+       #             .hyphenated()
        #             .encode_lower(&mut Uuid::encode_buffer())
        # }
        #
@@ -297,7 +296,7 @@ impl GridFSBucket {
             };
         }
 
-        let mut update = doc! { "length": length as i64, "uploadDate": Utc::now() };
+        let mut update = doc! { "length": length as i64, "uploadDate": DateTime::now() };
         if !disable_md5 {
             update.insert("md5", format!("{:02x}", md5.finalize()));
         }
@@ -325,6 +324,7 @@ mod tests {
     #[cfg(feature = "async-std-runtime")]
     use futures::StreamExt;
     use mongodb::{error::Error, Client, Database};
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     use std::io::Write;
     #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     use tokio_stream::StreamExt;
@@ -332,9 +332,10 @@ mod tests {
     fn db_name_new() -> String {
         "test_".to_owned()
             + Uuid::new_v4()
-                .to_hyphenated()
+                .hyphenated()
                 .encode_lower(&mut Uuid::encode_buffer())
     }
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     fn generate_large_text(size: usize) -> Vec<u8> {
         let mut buffer = Vec::new();
         buffer.reserve(size);
@@ -463,6 +464,7 @@ mod tests {
         // Ok(())
     }
 
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     #[tokio::test]
     async fn upload_from_stream_chunk_size_from_tokio_file() -> Result<(), Error> {
         let client = Client::with_uri_str(
@@ -532,6 +534,7 @@ mod tests {
         // Ok(())
     }
 
+    #[cfg(any(feature = "default", feature = "tokio-runtime"))]
     #[tokio::test]
     async fn upload_from_stream_chunk_size_from_align_tokio_file() -> Result<(), Error> {
         let client = Client::with_uri_str(
