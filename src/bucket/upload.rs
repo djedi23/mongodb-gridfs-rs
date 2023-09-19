@@ -70,7 +70,6 @@ impl GridFSBucket {
                 == Some(None)
             {
                 {
-                    #![allow(clippy::clone_double_ref)]
                     let is_collection_exists = self
                         .db
                         .list_collection_names(doc! {"name":file_collection.clone()})
@@ -121,7 +120,6 @@ impl GridFSBucket {
                     }
                 }
                 {
-                    #![allow(clippy::clone_double_ref)]
                     let is_collection_exists = self
                         .db
                         .list_collection_names(doc! {"name":chunk_collection.clone()})
