@@ -72,17 +72,17 @@ impl GridFSBucket {
                 {
                     let is_collection_exists = self
                         .db
-                        .list_collection_names(doc! {"name":file_collection.clone()})
+                        .list_collection_names(doc! {"name":file_collection})
                         .await?;
                     if is_collection_exists.is_empty() {
                         self.db
-                            .create_collection(&file_collection.clone(), None)
+                            .create_collection(&file_collection, None)
                             .await?
                     }
 
                     let indexes = self
                         .db
-                        .run_command(doc! {"listIndexes":file_collection.clone()}, None)
+                        .run_command(doc! {"listIndexes":file_collection}, None)
                         .await?;
                     let mut have_index = false;
                     for index in indexes
@@ -122,17 +122,17 @@ impl GridFSBucket {
                 {
                     let is_collection_exists = self
                         .db
-                        .list_collection_names(doc! {"name":chunk_collection.clone()})
+                        .list_collection_names(doc! {"name":chunk_collection})
                         .await?;
                     if is_collection_exists.is_empty() {
                         self.db
-                            .create_collection(&chunk_collection.clone(), None)
+                            .create_collection(&chunk_collection, None)
                             .await?
                     }
 
                     let indexes = self
                         .db
-                        .run_command(doc! {"listIndexes":chunk_collection.clone()}, None)
+                        .run_command(doc! {"listIndexes":chunk_collection}, None)
                         .await?;
                     let mut have_index = false;
                     for index in indexes
